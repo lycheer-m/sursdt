@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>开学快乐</title>
+<meta name="description" content="照顾好早八，愿你被早八温柔以待">
+<meta property="og:title" content="开学快乐">
+<meta property="og:description" content="照顾好早八，愿你被早八温柔以待">
+<meta property="og:image" content="https://lycheer-m.github.io/heart-blessing/cover.png">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://lycheer-m.github.io/heart-blessing/">
+<style>
+  :root {
+    --pink: #e9405f;
+    --pink-deep: #d92b4b;
+    --ink: #7a1f33;
+    --card-w: 120px;
+    --card-h: 50px;
+    --font-s: 15px;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    height: 100%;
+    overflow: hidden;
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", "微软雅黑",
+                 "Hiragino Sans GB", "Segoe UI", sans-serif;
+  }
+  body {
+    background: #e6d7b8 url('milkdragon.jpg') no-repeat center / cover;
+  }
+
+  /* 爱心中央的一句话 */
+  #center-msg {
+    position: fixed;
+    left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: var(--ink);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 1.2s ease;
+    z-index: 1;
+  }
+  #center-msg.show { opacity: 1; }
+  #center-msg .big {
+    font-size: clamp(18px, 3.4vw, 34px);
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+  #center-msg .sub {
+    margin-top: 6px;
+    font-size: clamp(12px, 1.8vw, 16px);
+    opacity: 0.85;
+  }
+
+  /* 祝福弹窗卡片 */
+  .card {
+    position: fixed;
+    left: 0; top: 0;
+    width: var(--card-w);
+    height: var(--card-h);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: #fff;
+    color: var(--pink-deep);
+    font-size: var(--font-s);
+    font-weight: 700;
+    border-radius: 4px;
+    border: 1px solid rgba(233, 64, 95, 0.18);
+    box-shadow: 0 6px 18px rgba(217, 43, 75, 0.22);
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    /* 出现/消失动画都走这里 */
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.4);
+    transition: transform .38s cubic-bezier(.34,1.56,.64,1),
+                opacity .38s ease;
+    z-index: 2;
+  }
+  .card .heart { color: inherit; font-size: 1.05em; }
+  .card.show {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  .card.hide {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.7);
+  }
+
+  /* 再来一次按钮 */
+  #replay {
+    position: fixed;
+    left: 50%; bottom: 26px;
+    transform: translateX(-50%);
+    padding: 10px 22px;
+    border: none;
+    border-radius: 999px;
+    background: #fff;
+    color: var(--pink-deep);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    box-shadow: 0 6px 18px rgba(217, 43, 75, 0.28);
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .5s ease, transform .2s ease;
+    z-index: 10000;
+  }
+  #replay.show { opacity: 1; pointer-events: auto; }
+  #replay:active { transform: translateX(-50%) scale(0.94); }
+
+  /* 音乐按钮 */
+  #music-toggle {
+    position: fixed;
+    top: 20px; right: 20px;
+    width: 48px; height: 48px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.92);
+    color: var(--pink-deep);
+    font-size: 22px;
+    line-height: 1;
+    box-shadow: 0 4px 14px rgba(217, 43, 75, 0.28);
+    cursor: pointer;
+    z-index: 10000;
+  }
+  #music-toggle:active { transform: scale(0.9); }
+
+  /* 入口界面（来电整蛊风） */
+  #entry {
+    position: fixed;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 56px 20px 48px;
+    background: linear-gradient(180deg, #10101c 0%, #1a1a2e 55%, #23233a 100%);
+    z-index: 20000;
+    transition: opacity .5s ease;
+    box-sizing: border-box;
+  }
+  #entry.hide { opacity: 0; pointer-events: none; }
+  .call-top { text-align: center; }
+  .call-status {
+    color: #9aa0b5;
+    font-size: 15px;
+    letter-spacing: 1px;
+  }
+  .call-name {
+    color: #fff;
+    font-size: 42px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    margin-top: 8px;
+  }
+  .call-avatar {
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3a3a5c, #23233a);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 62px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
+  }
+  .call-hint {
+    color: #9aa0b5;
+    font-size: 16px;
+    text-align: center;
+    min-height: 24px;
+    margin-top: 12px;
+  }
+  .call-actions {
+    display: flex;
+    gap: 64px;
+    align-items: flex-start;
+  }
+  .call-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: #fff;
+    font-size: 14px;
+    letter-spacing: 2px;
+  }
+  .call-btn .icon {
+    width: 66px; height: 66px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+  }
+  .call-btn.reject .icon { background: #e63946; }
+  .call-btn.answer .icon { background: #2ecc71; }
+  .call-btn:active .icon { transform: scale(0.9); }
+</style>
+</head>
+<body>
+
+<div id="entry">
+  <div class="call-top">
+    <div class="call-status">未知来电 · 可能骚扰电话</div>
+    <div class="call-name">银狐病毒</div>
+  </div>
+  <div class="call-avatar">🦊</div>
+  <div class="call-hint" id="call-hint">银狐病毒邀请您接听…</div>
+  <div class="call-actions">
+    <button class="call-btn reject" id="btn-reject"><span class="icon">✕</span><span>挂断</span></button>
+    <button class="call-btn answer" id="btn-answer"><span class="icon">📞</span><span>接听</span></button>
+  </div>
+</div>
+
+<div id="center-msg">
+  <div class="big">照顾好早八</div>
+  <div class="sub">愿你被早八温柔以待</div>
+</div>
+
+<button id="replay">♻ 再来一次</button>
+
+<audio id="bgm" src="music.mp3" loop preload="auto"></audio>
+<button id="music-toggle" title="播放音乐">🎵</button>
+
+<script>
+(function () {
+  // ============ 可改参数 ============
+  var MESSAGES = [
+    "早八人早八魂", "上课别睡觉", "期末不挂科", "食堂阿姨手别抖",
+    "卷死室友", "记得签到", "逃课必点名", "求老师捞一把",
+    "绩点冲4.0", "别熬夜打游戏", "实验室别炸", "室友带个饭",
+    "外卖到楼下", "干饭第一名", "奶茶续命", "头发别掉光",
+    "ddl是第一生产力", "作业明天再写", "考试全蒙对", "脱单成功",
+    "综测加满", "奖学金到手", "查寝别被抓", "抢课手速快"
+  ];
+  var POP_INTERVAL = 100;   // 每个间隔（毫秒）
+  var AUTO_CLOSE = 15000;   // 自动消失（毫秒）—— 已取消，卡片不再自动消失
+
+  // ============ 心形参数方程 ============
+  function heartPoints(n) {
+    var pts = [];
+    for (var i = 0; i < n; i++) {
+      var t = 2 * Math.PI * i / n;
+      var x = 16 * Math.pow(Math.sin(t), 3);
+      var y = 13 * Math.cos(t) - 5 * Math.cos(2 * t)
+            - 2 * Math.cos(3 * t) - Math.cos(4 * t);
+      pts.push({ x: x, y: y });
+    }
+    return pts;
+  }
+
+  // ============ 心形整体边界（细采样，供缩放居中用） ============
+  var RAW = (function () {
+    var pts = heartPoints(720);
+    var xs = pts.map(function (p) { return p.x; });
+    var ys = pts.map(function (p) { return p.y; });
+    return {
+      w: Math.max.apply(null, xs) - Math.min.apply(null, xs),
+      h: Math.max.apply(null, ys) - Math.min.apply(null, ys),
+      cx: (Math.min.apply(null, xs) + Math.max.apply(null, xs)) / 2,
+      cy: (Math.min.apply(null, ys) + Math.max.apply(null, ys)) / 2
+    };
+  })();
+
+  // ============ 响应式参数 ============
+  function responsive() {
+    var vw = window.innerWidth;
+    var vh = window.innerHeight;
+    var small = vw < 768;
+    // 弹窗数量：小屏少一点，避免挤成一团
+    var n = small ? 24 : 40;
+    // 卡片尺寸与字体随屏幕缩放
+    var s = Math.min((vw - 90) / RAW.w, (vh - 110) / RAW.h);
+    s = Math.max(s, 3.5);
+    var cw = Math.min(Math.max(s * 2.4, small ? 62 : 84), 132);
+    var ch = Math.min(Math.max(s * 1.05, small ? 32 : 40), 56);
+    var fs = Math.min(Math.max(s * 0.34, small ? 11 : 13), 17);
+    document.documentElement.style.setProperty('--card-w', cw + 'px');
+    document.documentElement.style.setProperty('--card-h', ch + 'px');
+    document.documentElement.style.setProperty('--font-s', fs + 'px');
+    return { n: n, s: s, vw: vw, vh: vh };
+  }
+
+  // ============ 心形坐标 → 屏幕坐标 ============
+  function computePositions(n, s, vw, vh) {
+    var pts = heartPoints(n);
+    var ox = vw / 2, oy = vh / 2;
+    return pts.map(function (p) {
+      return {
+        x: (p.x - RAW.cx) * s + ox,
+        y: -(p.y - RAW.cy) * s + oy   // 屏幕 y 向下，翻转
+      };
+    });
+  }
+
+  var positions = [];
+  var cards = [];        // { el, hideTimer }
+  var spawnTimers = [];
+
+  function clearAll() {
+    spawnTimers.forEach(clearTimeout);
+    spawnTimers = [];
+    cards.forEach(function (c) {
+      clearTimeout(c.hideTimer);
+      if (c.el.parentNode) c.el.parentNode.removeChild(c.el);
+    });
+    cards = [];
+  }
+
+  // 每个文字框一种颜色（循环取色，相邻不重色）
+  var PALETTE = [
+    '#ffd6dc', '#ffc2c7', '#ffd1b3', '#ffe3b3',
+    '#fce1a4', '#d8c7f7', '#c9bdf2', '#b8d4f5',
+    '#a8d8ea', '#b7e4c7', '#c4e2c9', '#ffd1dc'
+  ];
+  var colorIdx = 0;
+  var zTop = 0;
+
+  function makeCard(msg, x, y, heartIdx) {
+    var el = document.createElement('div');
+    el.className = 'card';
+    var c = PALETTE[colorIdx % PALETTE.length];
+    el.style.background = 'radial-gradient(ellipse at center, ' + c + ' 55%, transparent 100%)';
+    el.style.color = '#222';
+    el.style.border = 'none';
+    el.style.boxShadow = 'none';
+    el.style.zIndex = ++zTop;   // 新出来的框盖在旧的上面
+    colorIdx++;
+    el.innerHTML = '<span class="heart">❤</span><span>' + msg + '</span>';
+    el.style.left = x + 'px';
+    el.style.top = y + 'px';
+    document.body.appendChild(el);
+
+    // 下一帧再添加 .show，触发过渡动画
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () { el.classList.add('show'); });
+    });
+
+    cards.push({ el: el, hideTimer: null, heartIdx: heartIdx });
+
+    // 点击关闭（不再自动消失）
+    el.addEventListener('click', function () {
+      el.classList.add('hide');
+      setTimeout(function () {
+        if (el.parentNode) el.parentNode.removeChild(el);
+      }, 400);
+    });
+
+    return el;
+  }
+
+  function spawnOne(idx, positions, msgs) {
+    if (idx >= positions.length) {
+      fillScreen();   // 爱心成形后，铺满屏幕
+      return;
+    }
+    var pos = positions[idx];
+    makeCard(msgs[idx], pos.x, pos.y, idx);
+    var t = setTimeout(function () {
+      spawnOne(idx + 1, positions, msgs);
+    }, POP_INTERVAL);
+    spawnTimers.push(t);
+  }
+
+  // 爱心成形后，随机位置弹文字框真正铺满屏幕（不自动消失）
+  function fillScreen() {
+    var vw = window.innerWidth, vh = window.innerHeight;
+    var cs = getComputedStyle(document.documentElement);
+    var cw = parseFloat(cs.getPropertyValue('--card-w')) || 120;
+    var ch = parseFloat(cs.getPropertyValue('--card-h')) || 50;
+    // 按屏幕面积算数量，约 2 倍覆盖率，真正铺满
+    var count = Math.round((vw * vh) / (cw * ch) * 2.0);
+    count = Math.max(60, Math.min(count, 400));
+    var msgs = [];
+    for (var i = 0; i < count; i++) msgs.push(MESSAGES[i % MESSAGES.length]);
+    msgs.sort(function () { return Math.random() - 0.5; });
+    for (var i = 0; i < count; i++) {
+      (function (i) {
+        var x = 30 + Math.random() * (vw - 60);
+        var y = 30 + Math.random() * (vh - 60);
+        var t = setTimeout(function () { makeCard(msgs[i], x, y); }, i * 25);
+        spawnTimers.push(t);
+      })(i);
+    }
+  }
+
+  function play() {
+    clearAll();
+    colorIdx = 0;
+    zTop = 0;
+    var r = responsive();
+    positions = computePositions(r.n, r.s, r.vw, r.vh);
+
+    // 祝福文案循环铺满并打乱
+    var msgs = [];
+    for (var i = 0; i < r.n; i++) msgs.push(MESSAGES[i % MESSAGES.length]);
+    msgs.sort(function () { return Math.random() - 0.5; });
+
+    document.getElementById('center-msg').classList.add('show');
+    document.getElementById('replay').classList.add('show');
+
+    spawnOne(0, positions, msgs);
+  }
+
+  // 窗口尺寸变化时重新布局（防抖）
+  var resizeTimer = null;
+  window.addEventListener('resize', function () {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function () {
+      var r = responsive();
+      positions = computePositions(r.n, r.s, r.vw, r.vh);
+      // 只更新还存在的爱心卡片位置（铺满屏幕的随机卡片不动）
+      cards.forEach(function (c) {
+        if (c.heartIdx == null) return;
+        var p = positions[c.heartIdx];
+        if (p) { c.el.style.left = p.x + 'px'; c.el.style.top = p.y + 'px'; }
+      });
+    }, 150);
+  });
+
+  document.getElementById('replay').addEventListener('click', play);
+
+  // 音乐（手机浏览器需用户点一下才能出声）
+  var bgm = document.getElementById('bgm');
+  var musicBtn = document.getElementById('music-toggle');
+  var musicOn = false;
+
+  function startMusic() {
+    bgm.play().then(function () {
+      musicBtn.textContent = '🔊';
+      musicOn = true;
+    }).catch(function () {
+      musicBtn.textContent = '🎵';
+      musicOn = false;
+    });
+  }
+
+  musicBtn.addEventListener('click', function () {
+    if (musicOn) {
+      bgm.pause();
+      musicBtn.textContent = '🎵';
+      musicOn = false;
+    } else {
+      startMusic();
+    }
+  });
+
+  // 进入正题：接听来电 → 放音乐 + 开始爱心动画
+  var entry = document.getElementById('entry');
+  var callHint = document.getElementById('call-hint');
+
+  function enter() {
+    entry.classList.add('hide');
+    startMusic();
+    play();
+  }
+
+  document.getElementById('btn-answer').addEventListener('click', enter);
+
+  document.getElementById('btn-reject').addEventListener('click', function () {
+    callHint.textContent = '挂断无效，银狐病毒强行送达祝福… 😈';
+    setTimeout(enter, 900);
+  });
+})();
+</script>
+</body>
+</html>
