@@ -59,8 +59,10 @@
   .card {
     position: fixed;
     left: 0; top: 0;
-    width: var(--card-w);
-    height: var(--card-h);
+    min-width: var(--card-w);
+    max-width: 220px;
+    min-height: var(--card-h);
+    padding: 6px 10px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -69,7 +71,9 @@
     color: var(--pink-deep);
     font-size: var(--font-s);
     font-weight: 700;
-    border-radius: 4px;
+    line-height: 1.35;
+    text-align: center;
+    border-radius: 10px;
     border: 1px solid rgba(233, 64, 95, 0.18);
     box-shadow: 0 6px 18px rgba(217, 43, 75, 0.22);
     cursor: pointer;
@@ -82,7 +86,6 @@
                 opacity .38s ease;
     z-index: 2;
   }
-  .card .heart { color: inherit; font-size: 1.05em; }
   .card.show {
     opacity: 1;
     transform: translate(-50%, -50%) scale(1);
@@ -92,28 +95,14 @@
     transform: translate(-50%, -50%) scale(0.7);
   }
 
-  /* 再来一次按钮 */
-  #replay {
+  /* 蛋糕背景贴图 */
+  .cake-bg {
     position: fixed;
-    left: 50%; bottom: 26px;
-    transform: translateX(-50%);
-    padding: 10px 22px;
-    border: none;
-    border-radius: 999px;
-    background: #fff;
-    color: var(--pink-deep);
-    font-size: 15px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    box-shadow: 0 6px 18px rgba(217, 43, 75, 0.28);
-    cursor: pointer;
-    opacity: 0;
+    z-index: 0;
     pointer-events: none;
-    transition: opacity .5s ease, transform .2s ease;
-    z-index: 10000;
+    user-select: none;
+    -webkit-user-select: none;
   }
-  #replay.show { opacity: 1; pointer-events: auto; }
-  #replay:active { transform: translateX(-50%) scale(0.94); }
 
   /* 音乐按钮 */
   #music-toggle {
@@ -140,86 +129,88 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: space-between;
-    padding: 56px 20px 48px;
+    justify-content: center;
+    padding: 48px 20px;
     background: linear-gradient(180deg, #10101c 0%, #1a1a2e 55%, #23233a 100%);
     z-index: 20000;
     transition: opacity .5s ease;
     box-sizing: border-box;
   }
   #entry.hide { opacity: 0; pointer-events: none; }
-  .call-top { text-align: center; }
-  .call-status {
-    color: #9aa0b5;
-    font-size: 15px;
-    letter-spacing: 1px;
-  }
-  .call-name {
-    color: #fff;
-    font-size: 42px;
-    font-weight: 700;
-    letter-spacing: 3px;
-    margin-top: 8px;
-  }
-  .call-avatar {
-    width: 120px; height: 120px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #3a3a5c, #23233a);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 62px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
-  }
-  .call-hint {
-    color: #9aa0b5;
-    font-size: 16px;
-    text-align: center;
-    min-height: 24px;
-    margin-top: 12px;
-  }
-  .call-actions {
-    display: flex;
-    gap: 64px;
-    align-items: flex-start;
-  }
-  .call-btn {
+  /* 登录框 */
+  .login-box {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 10px;
-    background: transparent;
-    border: none;
-    cursor: pointer;
+    width: 100%;
+    max-width: 320px;
+    gap: 14px;
+  }
+  .login-avatar {
+    width: 120px; height: 120px;
+    border-radius: 16px;
+    background: url('tou.jpg') no-repeat center / cover;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
+  }
+  .login-title {
     color: #fff;
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: 3px;
+  }
+  .login-sub {
+    color: #9aa0b5;
     font-size: 14px;
-    letter-spacing: 2px;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
   }
-  .call-btn .icon {
-    width: 66px; height: 66px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 28px;
+  .login-input {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.06);
+    color: #fff;
+    font-size: 18px;
+    text-align: center;
+    letter-spacing: 4px;
+    outline: none;
+    box-sizing: border-box;
   }
-  .call-btn.reject .icon { background: #e63946; }
-  .call-btn.answer .icon { background: #2ecc71; }
-  .call-btn:active .icon { transform: scale(0.9); }
+  .login-input::placeholder { color: #6a7089; letter-spacing: 1px; }
+  .login-input:focus { border-color: #e9405f; }
+  .login-btn {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 12px;
+    background: #e9405f;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 6px;
+    cursor: pointer;
+    box-shadow: 0 6px 18px rgba(233, 64, 95, 0.35);
+  }
+  .login-btn:active { transform: scale(0.97); }
+  .login-error {
+    color: #ff6b6b;
+    font-size: 14px;
+    min-height: 20px;
+    letter-spacing: 1px;
+  }
 </style>
 </head>
 <body>
 
 <div id="entry">
-  <div class="call-top">
-    <div class="call-status">未知来电 · 可能骚扰电话</div>
-    <div class="call-name">银狐病毒</div>
-  </div>
-  <div class="call-avatar">🦊</div>
-  <div class="call-hint" id="call-hint">银狐病毒邀请您接听…</div>
-  <div class="call-actions">
-    <button class="call-btn reject" id="btn-reject"><span class="icon">✕</span><span>挂断</span></button>
-    <button class="call-btn answer" id="btn-answer"><span class="icon">📞</span><span>接听</span></button>
+  <div class="login-box">
+    <div class="login-avatar"></div>
+    <div class="login-title">迪迦系统已锁定</div>
+    <div class="login-sub">请输入密码解锁</div>
+    <input type="password" id="pwd-input" class="login-input" placeholder="请输入密码" autocomplete="off">
+    <button id="btn-login" class="login-btn">🔓 解锁</button>
+    <div class="login-error" id="login-error"></div>
   </div>
 </div>
 
@@ -227,8 +218,6 @@
   <div class="big">刘怡佳生日快乐</div>
   <div class="sub">愿你的每一天都被温柔以待</div>
 </div>
-
-<button id="replay">♻ 再来一次</button>
 
 <audio id="bgm" src="music.mp3" loop preload="auto"></audio>
 <button id="music-toggle" title="播放音乐">🎵</button>
@@ -238,31 +227,48 @@
   // ============ 可改参数 ============
   var MESSAGES = [
     "生日快乐，天天开心", "一岁一礼，一寸欢喜", "生日快乐，心想事成", "新的一岁，越来越好",
-    "平安喜乐，万事胜意", "年年有今日，岁岁有今朝，生日快乐", "生日快乐，愿你眼里有光，心中有梦，脚下有路", "生日快乐，年龄+1，烦恼清零",
-    "生于热爱，长于自由，生日快乐", "生日快乐，愿你的每一个明天都胜过今天",
-    
-    "生日快乐，愿你的世界永远清澈明朗，岁岁欢愉", "愿你走过山川湖海，依旧初心不改，生日快乐", "岁岁常欢愉，年年皆胜意", "新的一岁，闪闪发光",
+    "平安喜乐，万事胜意", "年年有今日，岁岁有今朝", "眼里有光，脚下有路", "年龄+1，烦恼清零",
+    "生于热爱，长于自由", "每个明天都更好",
+
+    "岁岁欢愉，清澈明朗", "走过山川，初心不改", "岁岁常欢愉，年年皆胜意", "新的一岁，闪闪发光",
     "所有美好，都如期而至"
   ];
   var POP_INTERVAL = 100;   // 每个间隔（毫秒）
   var AUTO_CLOSE = 15000;   // 自动消失（毫秒）—— 已取消，卡片不再自动消失
 
-  // ============ 心形参数方程 ============
-  function heartPoints(n) {
+  // ============ 数字形状（canvas 渲染文字后均匀采样描点） ============
+  var SHAPE_TEXT = '20';
+
+  function numberPoints(n) {
+    var cw = 260, ch = 200;
+    var cv = document.createElement('canvas');
+    cv.width = cw; cv.height = ch;
+    var ctx = cv.getContext('2d');
+    ctx.fillStyle = '#000';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font = 'bold 170px "Arial Black", "Arial", "Microsoft YaHei", sans-serif';
+    ctx.fillText(SHAPE_TEXT, cw / 2, ch / 2);
+
+    var d = ctx.getImageData(0, 0, cw, ch).data;
+    var pixels = [];
+    for (var y = 0; y < ch; y++) {
+      for (var x = 0; x < cw; x++) {
+        if (d[(y * cw + x) * 4 + 3] > 128) pixels.push({ x: x, y: y });
+      }
+    }
     var pts = [];
+    if (pixels.length === 0) return pts;
+    var step = pixels.length / n;
     for (var i = 0; i < n; i++) {
-      var t = 2 * Math.PI * i / n;
-      var x = 16 * Math.pow(Math.sin(t), 3);
-      var y = 13 * Math.cos(t) - 5 * Math.cos(2 * t)
-            - 2 * Math.cos(3 * t) - Math.cos(4 * t);
-      pts.push({ x: x, y: y });
+      pts.push(pixels[Math.floor(i * step)]);
     }
     return pts;
   }
 
-  // ============ 心形整体边界（细采样，供缩放居中用） ============
+  // ============ 数字整体边界（细采样，供缩放居中用） ============
   var RAW = (function () {
-    var pts = heartPoints(720);
+    var pts = numberPoints(720);
     var xs = pts.map(function (p) { return p.x; });
     var ys = pts.map(function (p) { return p.y; });
     return {
@@ -292,9 +298,9 @@
     return { n: n, s: s, vw: vw, vh: vh };
   }
 
-  // ============ 心形坐标 → 屏幕坐标 ============
+  // ============ 数字坐标 → 屏幕坐标 ============
   function computePositions(n, s, vw, vh) {
-    var pts = heartPoints(n);
+    var pts = numberPoints(n);
     var ox = vw / 2, oy = vh / 2;
     return pts.map(function (p) {
       return {
@@ -337,7 +343,7 @@
     el.style.boxShadow = 'none';
     el.style.zIndex = ++zTop;   // 新出来的框盖在旧的上面
     colorIdx++;
-    el.innerHTML = '<span class="heart">❤</span><span>' + msg + '</span>';
+    el.innerHTML = '<span>' + msg + '</span>';
     el.style.left = x + 'px';
     el.style.top = y + 'px';
     document.body.appendChild(el);
@@ -362,7 +368,7 @@
 
   function spawnOne(idx, positions, msgs) {
     if (idx >= positions.length) {
-      fillScreen();   // 爱心成形后，铺满屏幕
+      fillScreen();   // 数字成形后，铺满屏幕
       return;
     }
     var pos = positions[idx];
@@ -373,7 +379,7 @@
     spawnTimers.push(t);
   }
 
-  // 爱心成形后，随机位置弹文字框真正铺满屏幕（不自动消失）
+  // 数字成形后，随机位置弹文字框真正铺满屏幕（不自动消失）
   function fillScreen() {
     var vw = window.innerWidth, vh = window.innerHeight;
     var cs = getComputedStyle(document.documentElement);
@@ -395,6 +401,86 @@
     }
   }
 
+  // ============ 蛋糕背景贴图：只落在白底区域，避开中间的龙（黄色像素） ============
+  // 掩码离线分析好并 base64 编码（48×48，1=白底可用，0=龙/占用），
+  // 运行期直接解码，避免 file:// 下用 canvas 读像素被浏览器判为污染导致失败。
+  var CAKE_MASK_IMG_W = 1280, CAKE_MASK_IMG_H = 1295;
+  var CAKE_MASK_COLS = 48, CAKE_MASK_ROWS = 48;
+  var CAKE_MASK = null;   // Uint8Array，长度 cols*rows，1=白底可用
+  var COVER = null;       // { drawW, drawH, offX, offY, scale }
+
+  function buildCakeMask() {
+    var b64 = '///////////////////4D//////wB//////gA//////gAf/////gAf/////AAf/////AAf/////AAP/////AAP////+AAP////+AAH////8AAD////4AAD////4AAB////gAAA////AAAAP//+AAAAH//8AAAAH//4AAAAD//4AAAAD//4AAAAD//wAAAAB//wAAAAB//wAAAAD//wAAAAD//4AAAAH//4AAAAH//8AAAAD//4AAAAD//4AAAAD//4AAAAD//4AAAAB//4AAAAB//4AAAAB//4AAAAB//4AAAAB//4AAAAB//4AAAAD/5AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
+    var bin = atob(b64);
+    var mask = new Uint8Array(CAKE_MASK_COLS * CAKE_MASK_ROWS);
+    for (var i = 0; i < mask.length; i++) {
+      mask[i] = (bin.charCodeAt(i >> 3) >> (7 - (i & 7))) & 1;
+    }
+    CAKE_MASK = mask;
+    updateCover();
+  }
+
+  // 背景图用 cover 铺满屏幕，算出它的实际绘制范围（含偏移/缩放）
+  function updateCover() {
+    if (!CAKE_MASK) return;
+    var vw = window.innerWidth, vh = window.innerHeight;
+    var scale = Math.max(vw / CAKE_MASK_IMG_W, vh / CAKE_MASK_IMG_H);
+    var drawW = CAKE_MASK_IMG_W * scale, drawH = CAKE_MASK_IMG_H * scale;
+    COVER = { drawW: drawW, drawH: drawH, offX: (vw - drawW) / 2, offY: (vh - drawH) / 2, scale: scale };
+  }
+
+  // 屏幕坐标 → 背景图坐标 → 该处是否为白底
+  function isWhiteAt(sx, sy) {
+    if (!CAKE_MASK || !COVER) return false;
+    var ix = (sx - COVER.offX) / COVER.scale;
+    var iy = (sy - COVER.offY) / COVER.scale;
+    if (ix < 0 || iy < 0 || ix >= CAKE_MASK_IMG_W || iy >= CAKE_MASK_IMG_H) return false;
+    var col = Math.floor(ix / CAKE_MASK_IMG_W * CAKE_MASK_COLS);
+    var row = Math.floor(iy / CAKE_MASK_IMG_H * CAKE_MASK_ROWS);
+    if (col < 0 || col >= CAKE_MASK_COLS || row < 0 || row >= CAKE_MASK_ROWS) return false;
+    return CAKE_MASK[row * CAKE_MASK_COLS + col] === 1;
+  }
+
+  // 蛋糕中心 + 四周若干采样点都在白底，才放得下
+  function cakeFits(cx, cy, size) {
+    var h = size * 0.45;
+    return isWhiteAt(cx, cy) &&
+           isWhiteAt(cx - h, cy - h) && isWhiteAt(cx + h, cy - h) &&
+           isWhiteAt(cx - h, cy + h) && isWhiteAt(cx + h, cy + h);
+  }
+
+  // 蛋糕图片嵌入背景（抖动网格保证均匀稀疏，只落在白底）
+  function embedCakes() {
+    if (!CAKE_MASK) buildCakeMask();
+    updateCover();
+    var vw = window.innerWidth, vh = window.innerHeight;
+    var small = vw < 768;
+    var spacing = small ? 115 : 170;   // 格子间距，越大越稀疏
+    var cols = Math.max(2, Math.ceil(vw / spacing));
+    var rows = Math.max(2, Math.ceil(vh / spacing));
+    var cw = vw / cols, ch = vh / rows;
+    for (var r = 0; r < rows; r++) {
+      for (var c = 0; c < cols; c++) {
+        var size = small ? 28 + Math.random() * 24 : 40 + Math.random() * 36;
+        // 在格子内随机抖动，均匀又不过于整齐
+        var x = c * cw + Math.random() * (cw - size);
+        var y = r * ch + Math.random() * (ch - size);
+        if (!cakeFits(x + size / 2, y + size / 2, size)) continue;
+        var img = document.createElement('img');
+        img.src = 'dangao.jpg';
+        img.className = 'cake-bg';
+        img.style.width = size + 'px';
+        img.style.left = x + 'px';
+        img.style.top = y + 'px';
+        img.style.transform = 'rotate(' + (Math.random() * 360 - 180) + 'deg)';
+        img.style.opacity = (0.35 + Math.random() * 0.3).toFixed(2);
+        document.body.appendChild(img);
+      }
+    }
+  }
+
+  buildCakeMask();   // 页面加载即解码掩码，登录后直接可用
+
   function play() {
     clearAll();
     colorIdx = 0;
@@ -408,7 +494,6 @@
     msgs.sort(function () { return Math.random() - 0.5; });
 
     document.getElementById('center-msg').classList.add('show');
-    document.getElementById('replay').classList.add('show');
 
     spawnOne(0, positions, msgs);
   }
@@ -420,7 +505,7 @@
     resizeTimer = setTimeout(function () {
       var r = responsive();
       positions = computePositions(r.n, r.s, r.vw, r.vh);
-      // 只更新还存在的爱心卡片位置（铺满屏幕的随机卡片不动）
+      // 只更新还存在的数字卡片位置（铺满屏幕的随机卡片不动）
       cards.forEach(function (c) {
         if (c.heartIdx == null) return;
         var p = positions[c.heartIdx];
@@ -428,8 +513,6 @@
       });
     }, 150);
   });
-
-  document.getElementById('replay').addEventListener('click', play);
 
   // 音乐（手机浏览器需用户点一下才能出声）
   var bgm = document.getElementById('bgm');
@@ -456,21 +539,34 @@
     }
   });
 
-  // 进入正题：接听来电 → 放音乐 + 开始爱心动画
+  // 进入正题：密码正确 → 放音乐 + 开始爱心动画
   var entry = document.getElementById('entry');
-  var callHint = document.getElementById('call-hint');
+  var pwdInput = document.getElementById('pwd-input');
+  var loginError = document.getElementById('login-error');
+  var PASSWORD = '20260830';
 
   function enter() {
     entry.classList.add('hide');
     startMusic();
     play();
+    embedCakes();
   }
 
-  document.getElementById('btn-answer').addEventListener('click', enter);
+  function tryLogin() {
+    if (pwdInput.value.trim() === PASSWORD) {
+      loginError.textContent = '';
+      enter();
+    } else {
+      loginError.textContent = '密码错误，请重新输入';
+      pwdInput.value = '';
+      pwdInput.focus();
+    }
+  }
 
-  document.getElementById('btn-reject').addEventListener('click', function () {
-    callHint.textContent = '挂断无效，银狐病毒强行送达祝福… 😈';
-    setTimeout(enter, 900);
+  document.getElementById('btn-login').addEventListener('click', tryLogin);
+
+  pwdInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') tryLogin();
   });
 })();
 </script>
