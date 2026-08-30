@@ -28,7 +28,7 @@
                  "Hiragino Sans GB", "Segoe UI", sans-serif;
   }
   body {
-    background: #e6d7b8 url('milkdragon.jpg') no-repeat center / cover;
+    background: #e6d7b8 url('aa.jpg') no-repeat center / cover;
   }
 
   /* 爱心中央的一句话 */
@@ -93,15 +93,6 @@
   .card.hide {
     opacity: 0;
     transform: translate(-50%, -50%) scale(0.7);
-  }
-
-  /* 蛋糕背景贴图 */
-  .cake-bg {
-    position: fixed;
-    z-index: 0;
-    pointer-events: none;
-    user-select: none;
-    -webkit-user-select: none;
   }
 
   /* 音乐按钮 */
@@ -252,16 +243,28 @@
 
     var d = ctx.getImageData(0, 0, cw, ch).data;
     var pixels = [];
+    var minx = cw, miny = ch, maxx = 0, maxy = 0;
     for (var y = 0; y < ch; y++) {
       for (var x = 0; x < cw; x++) {
-        if (d[(y * cw + x) * 4 + 3] > 128) pixels.push({ x: x, y: y });
+        if (d[(y * cw + x) * 4 + 3] > 128) {
+          pixels.push({ x: x, y: y });
+          if (x < minx) minx = x;
+          if (x > maxx) maxx = x;
+          if (y < miny) miny = y;
+          if (y > maxy) maxy = y;
+        }
       }
     }
     var pts = [];
     if (pixels.length === 0) return pts;
     var step = pixels.length / n;
+    // 归一化到与心形一致的坐标尺度（宽约 32 单位），复用原有缩放/居中逻辑
+    var bw = maxx - minx || 1, bh = maxy - miny || 1;
+    var sc = 32 / bw;
+    var cx = (minx + maxx) / 2, cy = (miny + maxy) / 2;
     for (var i = 0; i < n; i++) {
-      pts.push(pixels[Math.floor(i * step)]);
+      var p = pixels[Math.floor(i * step)];
+      pts.push({ x: (p.x - cx) * sc, y: (p.y - cy) * sc });
     }
     return pts;
   }
@@ -284,8 +287,8 @@
     var vw = window.innerWidth;
     var vh = window.innerHeight;
     var small = vw < 768;
-    // 弹窗数量：小屏少一点，避免挤成一团
-    var n = small ? 24 : 40;
+    // 弹窗数量：数字由更多点组成，数量比心形略多；小屏少一点
+    var n = small ? 32 : 52;
     // 卡片尺寸与字体随屏幕缩放
     var s = Math.min((vw - 90) / RAW.w, (vh - 110) / RAW.h);
     s = Math.max(s, 3.5);
@@ -383,11 +386,12 @@
   function fillScreen() {
     var vw = window.innerWidth, vh = window.innerHeight;
     var cs = getComputedStyle(document.documentElement);
-    var cw = parseFloat(cs.getPropertyValue('--card-w')) || 120;
-    var ch = parseFloat(cs.getPropertyValue('--card-h')) || 50;
-    // 按屏幕面积算数量，约 2 倍覆盖率，真正铺满
+    var fs = parseFloat(cs.getPropertyValue('--font-s')) || 15;
+    // 卡片已改成自适应尺寸，用字号估算真实大小，避免铺得过密
+    var cw = fs * 8 + 26;
+    var ch = fs * 1.4 + 14;
     var count = Math.round((vw * vh) / (cw * ch) * 2.0);
-    count = Math.max(60, Math.min(count, 400));
+    count = Math.max(40, Math.min(count, 320));
     var msgs = [];
     for (var i = 0; i < count; i++) msgs.push(MESSAGES[i % MESSAGES.length]);
     msgs.sort(function () { return Math.random() - 0.5; });
@@ -400,86 +404,6 @@
       })(i);
     }
   }
-
-  // ============ 蛋糕背景贴图：只落在白底区域，避开中间的龙（黄色像素） ============
-  // 掩码离线分析好并 base64 编码（48×48，1=白底可用，0=龙/占用），
-  // 运行期直接解码，避免 file:// 下用 canvas 读像素被浏览器判为污染导致失败。
-  var CAKE_MASK_IMG_W = 1280, CAKE_MASK_IMG_H = 1295;
-  var CAKE_MASK_COLS = 48, CAKE_MASK_ROWS = 48;
-  var CAKE_MASK = null;   // Uint8Array，长度 cols*rows，1=白底可用
-  var COVER = null;       // { drawW, drawH, offX, offY, scale }
-
-  function buildCakeMask() {
-    var b64 = '///////////////////4D//////wB//////gA//////gAf/////gAf/////AAf/////AAf/////AAP/////AAP////+AAP////+AAH////8AAD////4AAD////4AAB////gAAA////AAAAP//+AAAAH//8AAAAH//4AAAAD//4AAAAD//4AAAAD//wAAAAB//wAAAAB//wAAAAD//wAAAAD//4AAAAH//4AAAAH//8AAAAD//4AAAAD//4AAAAD//4AAAAD//4AAAAB//4AAAAB//4AAAAB//4AAAAB//4AAAAB//4AAAAB//4AAAAD/5AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
-    var bin = atob(b64);
-    var mask = new Uint8Array(CAKE_MASK_COLS * CAKE_MASK_ROWS);
-    for (var i = 0; i < mask.length; i++) {
-      mask[i] = (bin.charCodeAt(i >> 3) >> (7 - (i & 7))) & 1;
-    }
-    CAKE_MASK = mask;
-    updateCover();
-  }
-
-  // 背景图用 cover 铺满屏幕，算出它的实际绘制范围（含偏移/缩放）
-  function updateCover() {
-    if (!CAKE_MASK) return;
-    var vw = window.innerWidth, vh = window.innerHeight;
-    var scale = Math.max(vw / CAKE_MASK_IMG_W, vh / CAKE_MASK_IMG_H);
-    var drawW = CAKE_MASK_IMG_W * scale, drawH = CAKE_MASK_IMG_H * scale;
-    COVER = { drawW: drawW, drawH: drawH, offX: (vw - drawW) / 2, offY: (vh - drawH) / 2, scale: scale };
-  }
-
-  // 屏幕坐标 → 背景图坐标 → 该处是否为白底
-  function isWhiteAt(sx, sy) {
-    if (!CAKE_MASK || !COVER) return false;
-    var ix = (sx - COVER.offX) / COVER.scale;
-    var iy = (sy - COVER.offY) / COVER.scale;
-    if (ix < 0 || iy < 0 || ix >= CAKE_MASK_IMG_W || iy >= CAKE_MASK_IMG_H) return false;
-    var col = Math.floor(ix / CAKE_MASK_IMG_W * CAKE_MASK_COLS);
-    var row = Math.floor(iy / CAKE_MASK_IMG_H * CAKE_MASK_ROWS);
-    if (col < 0 || col >= CAKE_MASK_COLS || row < 0 || row >= CAKE_MASK_ROWS) return false;
-    return CAKE_MASK[row * CAKE_MASK_COLS + col] === 1;
-  }
-
-  // 蛋糕中心 + 四周若干采样点都在白底，才放得下
-  function cakeFits(cx, cy, size) {
-    var h = size * 0.45;
-    return isWhiteAt(cx, cy) &&
-           isWhiteAt(cx - h, cy - h) && isWhiteAt(cx + h, cy - h) &&
-           isWhiteAt(cx - h, cy + h) && isWhiteAt(cx + h, cy + h);
-  }
-
-  // 蛋糕图片嵌入背景（抖动网格保证均匀稀疏，只落在白底）
-  function embedCakes() {
-    if (!CAKE_MASK) buildCakeMask();
-    updateCover();
-    var vw = window.innerWidth, vh = window.innerHeight;
-    var small = vw < 768;
-    var spacing = small ? 115 : 170;   // 格子间距，越大越稀疏
-    var cols = Math.max(2, Math.ceil(vw / spacing));
-    var rows = Math.max(2, Math.ceil(vh / spacing));
-    var cw = vw / cols, ch = vh / rows;
-    for (var r = 0; r < rows; r++) {
-      for (var c = 0; c < cols; c++) {
-        var size = small ? 28 + Math.random() * 24 : 40 + Math.random() * 36;
-        // 在格子内随机抖动，均匀又不过于整齐
-        var x = c * cw + Math.random() * (cw - size);
-        var y = r * ch + Math.random() * (ch - size);
-        if (!cakeFits(x + size / 2, y + size / 2, size)) continue;
-        var img = document.createElement('img');
-        img.src = 'dangao.jpg';
-        img.className = 'cake-bg';
-        img.style.width = size + 'px';
-        img.style.left = x + 'px';
-        img.style.top = y + 'px';
-        img.style.transform = 'rotate(' + (Math.random() * 360 - 180) + 'deg)';
-        img.style.opacity = (0.35 + Math.random() * 0.3).toFixed(2);
-        document.body.appendChild(img);
-      }
-    }
-  }
-
-  buildCakeMask();   // 页面加载即解码掩码，登录后直接可用
 
   function play() {
     clearAll();
@@ -549,7 +473,6 @@
     entry.classList.add('hide');
     startMusic();
     play();
-    embedCakes();
   }
 
   function tryLogin() {
