@@ -60,9 +60,9 @@
     position: fixed;
     left: 0; top: 0;
     min-width: var(--card-w);
-    max-width: 220px;
+    max-width: 110px;
     min-height: var(--card-h);
-    padding: 6px 10px;
+    padding: 4px 7px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -93,6 +93,11 @@
   .card.hide {
     opacity: 0;
     transform: translate(-50%, -50%) scale(0.7);
+  }
+  .card.fade-out {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.6);
+    transition: opacity 1.4s ease, transform 1.4s ease;
   }
 
   /* 音乐按钮 */
@@ -210,7 +215,7 @@
   <div class="sub">愿你的每一天都被温柔以待</div>
 </div>
 
-<audio id="bgm" src="music.mp3" loop preload="auto"></audio>
+<audio id="bgm" src="vid_audio.mp3" loop preload="auto"></audio>
 <button id="music-toggle" title="播放音乐">🎵</button>
 
 <script>
@@ -224,7 +229,7 @@
     "岁岁欢愉，清澈明朗", "走过山川，初心不改", "岁岁常欢愉，年年皆胜意", "新的一岁，闪闪发光",
     "所有美好，都如期而至"
   ];
-  var POP_INTERVAL = 100;   // 每个间隔（毫秒）
+  var POP_INTERVAL = 60;   // 每个间隔（毫秒）
   var AUTO_CLOSE = 15000;   // 自动消失（毫秒）—— 已取消，卡片不再自动消失
 
   // ============ 数字形状（canvas 渲染文字后均匀采样描点） ============
@@ -287,14 +292,14 @@
     var vw = window.innerWidth;
     var vh = window.innerHeight;
     var small = vw < 768;
-    // 弹窗数量：数字由更多点组成，数量比心形略多；小屏少一点
-    var n = small ? 32 : 52;
-    // 卡片尺寸与字体随屏幕缩放
+    // 弹窗数量：数字要更细致，点更多；小屏少一点
+    var n = small ? 60 : 110;
+    // 卡片尺寸与字体随屏幕缩放（整体缩小，更细致）
     var s = Math.min((vw - 90) / RAW.w, (vh - 110) / RAW.h);
     s = Math.max(s, 3.5);
-    var cw = Math.min(Math.max(s * 2.4, small ? 62 : 84), 132);
-    var ch = Math.min(Math.max(s * 1.05, small ? 32 : 40), 56);
-    var fs = Math.min(Math.max(s * 0.34, small ? 11 : 13), 17);
+    var cw = Math.min(Math.max(s * 1.5, small ? 30 : 36), 88);
+    var ch = Math.min(Math.max(s * 0.7, small ? 18 : 22), 40);
+    var fs = Math.min(Math.max(s * 0.26, small ? 9 : 10), 13);
     document.documentElement.style.setProperty('--card-w', cw + 'px');
     document.documentElement.style.setProperty('--card-h', ch + 'px');
     document.documentElement.style.setProperty('--font-s', fs + 'px');
@@ -308,7 +313,7 @@
     return pts.map(function (p) {
       return {
         x: (p.x - RAW.cx) * s + ox,
-        y: -(p.y - RAW.cy) * s + oy   // 屏幕 y 向下，翻转
+        y: (p.y - RAW.cy) * s + oy   // canvas 已是屏幕方向（y 向下），无需翻转
       };
     });
   }
@@ -371,7 +376,9 @@
 
   function spawnOne(idx, positions, msgs) {
     if (idx >= positions.length) {
-      fillScreen();   // 数字成形后，铺满屏幕
+      // 数字成形后停顿两秒，再让数字慢慢消失
+      var t = setTimeout(fadeOutShape, 2000);
+      spawnTimers.push(t);
       return;
     }
     var pos = positions[idx];
@@ -379,6 +386,21 @@
     var t = setTimeout(function () {
       spawnOne(idx + 1, positions, msgs);
     }, POP_INTERVAL);
+    spawnTimers.push(t);
+  }
+
+  // 让组成数字的卡片慢慢消失，然后再铺满屏幕
+  function fadeOutShape() {
+    cards.forEach(function (c) {
+      if (c.heartIdx != null) c.el.classList.add('fade-out');
+    });
+    var t = setTimeout(function () {
+      cards.forEach(function (c) {
+        if (c.heartIdx != null && c.el.parentNode) c.el.parentNode.removeChild(c.el);
+      });
+      cards = cards.filter(function (c) { return c.heartIdx == null; });
+      fillScreen();
+    }, 1500);
     spawnTimers.push(t);
   }
 
